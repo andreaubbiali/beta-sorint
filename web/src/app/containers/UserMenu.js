@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react'
 import { graphql, compose } from 'react-apollo'
 import gql from 'graphql-tag'
 import { Link } from 'react-router-dom'
-import { Menu, Dropdown, Dimmer, Loader } from 'semantic-ui-react'
+import { Menu, Dropdown, Dimmer, Loader, Icon } from 'semantic-ui-react'
 import DayPicker from 'react-day-picker'
 
 import 'react-day-picker/lib/style.css'
@@ -96,7 +96,14 @@ class UserMenu extends React.Component {
 
     // sort parents by depth
     const parentOrderedKeys = Object.keys(parents).sort((a, b) => (parents[a].depth - parents[b].depth))
-
+    
+    // get the core circles of the current user
+    let coreCircleUid = 0;
+    for(let i = 0; i < member.roles.length; i++) {
+      if(member.roles[i].role.name == "Core Members")
+        coreCircleUid = member.roles[i].role.parent.uid
+    }
+    
     return (
       <Menu>
         <Menu.Item name='Organization' as={Link} to={Util.orgChartUrl(null, timeLine)} />
@@ -105,7 +112,7 @@ class UserMenu extends React.Component {
           <Dropdown.Menu>
             { member.circles.map(circle => (
               <Dropdown.Item key={circle.role.uid} as={Link} to={Util.roleUrl(circle.role.uid, timeLine)}>
-                {circle.role.name}
+                {circle.role.name} { circle.role.uid == coreCircleUid && <Icon inverted color='orange' name='selected radio'></Icon>}
               </Dropdown.Item>
             ))}
           </Dropdown.Menu>
@@ -115,20 +122,25 @@ class UserMenu extends React.Component {
         <Dropdown item scrolling text='My Roles'>
           <Dropdown.Menu>
             { parentOrderedKeys.map((parentUID) => {
-              const roles = rolesMap[parentUID]
+              let roles = rolesMap[parentUID]
               const parent = parents[parentUID]
+              // remove core members from roles
+              for(let i = 0; i < roles.length; i++) {
+                if(roles[i].name === "Core Members") {
+                  roles.splice(i, 1)
+                }
+              }
               const items = roles.map(role => (
                 <Dropdown.Item key={role.uid} as={Link} to={Util.roleUrl(role.uid, timeLine)}>
                   {role.name}
                 </Dropdown.Item>
-                ))
-
+              ))
               return (
                 [
                   <Dropdown.Header key={parent.uid}>
-                    {parent.name}
+                    {parent.name} { parent.uid == coreCircleUid && <Icon inverted color='orange' name='selected radio'></Icon> }
                   </Dropdown.Header>,
-                    [...items]
+                  [...items]
                 ]
               )
             }

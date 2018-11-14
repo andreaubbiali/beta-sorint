@@ -159,6 +159,10 @@ class OrgChart extends React.Component {
     return nodes.map(node => {
       if (node.data.type !== 'circle' && node.data.type !== 'role') return
 
+      // We hide custom core members role named 'Core Members'
+      if (node.data.name === 'Core Members') return
+        
+
       const x = (node.x - ix) * k
       const y = (node.y - iy) * k
       const r = node.r * k
@@ -208,6 +212,9 @@ class OrgChart extends React.Component {
 
     return nodes.map(node => {
       if (node.data.type !== 'title' && node.data.type !== 'role') return
+
+      // We hide custom core members role named 'Core Members'
+      if (node.data.name === 'Core Members') return
 
       if (node.data.depth - zoomnode.data.depth > 2) return
 
