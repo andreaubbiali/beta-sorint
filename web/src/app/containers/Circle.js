@@ -126,6 +126,11 @@ class Circle extends React.Component {
       case 'leadlink': return 1
       case 'replink': return 2
       case 'facilitator': return 3
+      case 'engager': return 5
+      case 'champion': return 6
+      case 'scout': return 7
+      case 'magister': return 8
+      case 'mangler': return 9
       case 'secretary': return 4
       default: return 0
     }
@@ -224,10 +229,13 @@ class Circle extends React.Component {
 
         if (roleType === 'normal' || roleType === 'circle') roles.push(r)
 
+        // We hide these standard core roles: replink, facilitator, secretary
+
         if (roleType === 'leadlink' ||
-          roleType === 'replink' ||
-          roleType === 'facilitator' ||
-          roleType === 'secretary') coreRoles.push(r)
+          roleType === 'engager' ||
+          roleType === 'scout' ||
+          roleType === 'champion' ||
+          roleType === 'magister') coreRoles.push(r)
       }
 
       coreRoles.sort((a, b) => {
@@ -267,7 +275,7 @@ class Circle extends React.Component {
           <Card key={r.uid}>
             <Card.Content style={{'flexGrow': 0}}>
               { roleType === 'leadlink' && canEdit && viewerPermissions.assignRootCircleLeadLink &&
-              <Popup className='ui' content='Manage Lead Link' trigger={
+              <Popup className='ui' content='Manage Sircle Leader' trigger={
                 <span className='ui right floated'>
                   <Icon name='user add' link onClick={() => { this.setSetCoreRoleMember(r.uid, roleType) }} />
                 </span>
@@ -362,7 +370,7 @@ class Circle extends React.Component {
                   <Avatar uid={leadlinkMember.uid} size={30} inline spaced shape='rounded' />
                   {leadlinkMember.userName}
                 </Link>
-                <span> (Lead Link)</span>
+                <span> (Sircle Leader)</span>
               </List.Item>)
           } else {
             fillers.push(<div key='none'>no leadlink assigned</div>)
@@ -385,7 +393,7 @@ class Circle extends React.Component {
               } />
           }
               {r.roleType === 'circle' && canEdit && viewerPermissions.assignChildCircleLeadLink &&
-              <Popup content='Set circle Lead Link' trigger={
+              <Popup content='Set Sircle Leader' trigger={
                 <span className='ui right floated'>
                   <Icon name='user add' link onClick={() => { this.setRoleSetLeadLink(r.uid, leadlink.uid) }} />
                 </span>
@@ -467,6 +475,16 @@ class Circle extends React.Component {
         deletableRoles.push(r)
       }
 
+      // We hide these standard core roles: replink, facilitator, secretary
+      let editableRoles = []
+      for (let i = 0; i < role.roles.length; i++) {
+        const r = role.roles[i]
+        const roleType = r.roleType
+        if (roleType === 'facilitator' || roleType === 'replink' || roleType == 'secretary') continue
+        editableRoles.push(r)
+      }
+ 
+
       tab =
         <Segment>
           <Grid stackable columns={3}>
@@ -480,7 +498,7 @@ class Circle extends React.Component {
                   <Dropdown.Menu>
                     {/* <i class="add user icon"></i> */}
                     <Dropdown.Menu scrolling >
-                      {role.roles.map((role) => <Dropdown.Item key={role.uid} text={role.name} onClick={() => { this.setChildRoleUpdate(role) }} />)}
+                      {editableRoles.map((role) => <Dropdown.Item key={role.uid} text={role.name} onClick={() => { this.setChildRoleUpdate(role) }} />)}
                     </Dropdown.Menu>
                   </Dropdown.Menu>
                 </Dropdown>
