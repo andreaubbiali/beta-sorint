@@ -348,13 +348,12 @@ class Circle extends React.Component {
                 {focusString}
               </List.Item>)
           }
-
-          if (r.roleMembers.length === 0) {
+          fillers.push(<List>{extras}</List>)
+          if (fillers.length === 0) {
             fillers.push(<div key='none'>no members assigned to role</div>)
           } else {
             fillers.push(<List>{extras}</List>)
           }
-
           if (r.roleMembers.length > 3) { // Other members accordion
             extras = []
             const moreFillersCount = r.roleMembers.length - 3
