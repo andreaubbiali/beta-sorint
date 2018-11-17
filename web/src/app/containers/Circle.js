@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react'
 import { graphql, compose } from 'react-apollo'
 import gql from 'graphql-tag'
 import { Link } from 'react-router-dom'
-import { Container, Header, Segment, Form, Button, Grid, Menu, Card, List, Table, Popup, Icon, Dropdown, Label, TextArea } from 'semantic-ui-react'
+import { Container, Header, Segment, Form, Button, Grid, Menu, Card, List, Table, Popup, Icon, Dropdown, Label, TextArea, Accordion } from 'semantic-ui-react'
 import moment from 'moment'
 import marked from 'marked'
 
@@ -126,6 +126,11 @@ class Circle extends React.Component {
       case 'leadlink': return 1
       case 'replink': return 2
       case 'facilitator': return 3
+      case 'engager': return 5
+      case 'champion': return 6
+      case 'scout': return 7
+      case 'magister': return 8
+      case 'mangler': return 9
       case 'secretary': return 4
       default: return 0
     }
@@ -197,7 +202,11 @@ class Circle extends React.Component {
                   <Avatar uid={d.member.uid} size={50} floated='right' inline spaced shape='rounded' />
                   <Card.Header>
                     <Link to={Util.memberUrl(d.member.uid, timeLine)}>
-                      {d.member.userName}{d.customCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                    <Popup content={d.member.fullName} trigger={
+                      <span>
+                        {d.member.userName}{d.customCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                      </span>
+                    } />
                     </Link>
                   </Card.Header>
                 </Card.Content>
@@ -219,7 +228,11 @@ class Circle extends React.Component {
                   <Avatar uid={d.member.uid} size={50} floated='right' inline spaced shape='rounded' />
                   <Card.Header>
                     <Link to={Util.memberUrl(d.member.uid, timeLine)}>
-                      {d.member.userName} {isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                      <Popup content={d.member.fullName} trigger={
+                        <span>
+                          {d.member.userName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                        </span>
+                      } />
                     </Link>
                   </Card.Header>
                 </Card.Content>
@@ -251,10 +264,13 @@ class Circle extends React.Component {
 
         if (roleType === 'normal' || roleType === 'circle') roles.push(r)
 
+        // We hide these standard core roles: replink, facilitator, secretary
+
         if (roleType === 'leadlink' ||
-          roleType === 'replink' ||
-          roleType === 'facilitator' ||
-          roleType === 'secretary') coreRoles.push(r)
+          roleType === 'engager' ||
+          roleType === 'scout' ||
+          roleType === 'champion' ||
+          roleType === 'magister') coreRoles.push(r)
       }
 
       coreRoles.sort((a, b) => {
@@ -280,7 +296,11 @@ class Circle extends React.Component {
           filler =
             <Link to={memberLink}>
               <Avatar uid={member.uid} size={30} inline spaced shape='rounded' />
-              {member.userName} {isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+              <Popup content={member.fullName} trigger={
+                <span>
+                  {member.userName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                </span>
+              } />
             </Link>
           if (moment.utc(roleMember.electionExpiration).isValid()) {
             expireInfo = 'expires on ' + moment.utc(roleMember.electionExpiration).format('L')
@@ -295,7 +315,7 @@ class Circle extends React.Component {
           <Card key={r.uid}>
             <Card.Content style={{'flexGrow': 0}}>
               { roleType === 'leadlink' && canEdit && viewerPermissions.assignRootCircleLeadLink &&
-              <Popup className='ui' content='Manage Lead Link' trigger={
+              <Popup className='ui' content='Manage Sircle Leader' trigger={
                 <span className='ui right floated'>
                   <Icon name='user add' link onClick={() => { this.setSetCoreRoleMember(r.uid, roleType) }} />
                 </span>
@@ -338,6 +358,7 @@ class Circle extends React.Component {
         const roleType = r.roleType
 
         let fillers = []
+        let extras = []
         if (roleType === 'normal') {
           for (let i = 0, len = r.roleMembers.length; i < len; i++) {
             // Only display max 3 fillers
@@ -352,23 +373,58 @@ class Circle extends React.Component {
             
             const memberLink = Util.memberUrl(member.uid, timeLine)
             const isCustomCore = (sorintCoreMemberIds.indexOf(member.uid) >= 0);
-
-            fillers.push(
+            extras.push(
               <List.Item key={member.uid}>
                 <Link to={memberLink}>
                   <Avatar uid={member.uid} size={30} inline spaced shape='rounded' />
-                  {member.userName} {isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                  <Popup content={member.fullName} trigger={
+                    <span>
+                      {member.userName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                    </span>
+                  } />
                 </Link>
                 {focusString}
               </List.Item>)
           }
-          if (fillers.length === 0) {
-            /* TODO(sgotti) limit showed fillers when exceeding a choosed number and show a "more" button */
+          if (extras.length === 0) {
             fillers.push(<div key='none'>no members assigned to role</div>)
+          } else {
+            fillers.push(<List>{extras}</List>)
           }
-          if (r.roleMembers.length > 3) {
+          if (r.roleMembers.length > 3) { // Other members accordion
+            extras = []
             const moreFillersCount = r.roleMembers.length - 3
-            fillers.push(<div key='more'>... {moreFillersCount} other {moreFillersCount > 1 ? 'members' : 'member' }</div>)
+            for (let i = 3, len = r.roleMembers.length; i < len; i++) {
+              let focus = r.roleMembers[i].focus
+              let focusString = ''
+              if (focus) {
+                focusString = ` (${focus})`
+              }
+              let extramember = r.roleMembers[i].member
+              const extramemberLink = Util.memberUrl(extramember.uid, timeLine)
+              extras.push(
+                <List.Item key={extramember.uid}>
+                  <Link to={extramemberLink}>
+                    <Avatar uid={extramember.uid} size={30} inline spaced shape='rounded' />
+                    <Popup content={extramember.fullName} trigger={
+                      <span>
+                        {extramember.userName}
+                      </span>
+                    } />
+                  </Link>
+                  {focusString}
+                </List.Item>)
+            }
+            fillers.push(
+              <Accordion>
+                <Accordion.Title><Icon name='dropdown' />{moreFillersCount} other {moreFillersCount > 1 ? 'members' : 'member' }</Accordion.Title>
+                <Accordion.Content>
+                  <List>
+                    {extras}
+                  </List>
+                </Accordion.Content>
+              </Accordion>
+            )
           }
         }
 
@@ -390,13 +446,16 @@ class Circle extends React.Component {
             const isCustomCore = (sorintCoreMemberIds.indexOf(extramember.uid) >= 0);
 
             fillers.push(
-              <List.Item key={leadlinkMember.uid}>
-                <Link to={memberLink}>
-                  <Avatar uid={leadlinkMember.uid} size={30} inline spaced shape='rounded' />
-                  {leadlinkMember.userName} {isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
-                </Link>
-                <span> (Lead Link)</span>
-              </List.Item>)
+              <List>
+                <List.Item key={leadlinkMember.uid}>
+                  <Link to={memberLink}>
+                    <Avatar uid={leadlinkMember.uid} size={30} inline spaced shape='rounded' />
+                   {leadlinkMember.userName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                 </Link>
+                  <span> (Sircle Leader)</span>
+                </List.Item>
+              </List>
+            )
           } else {
             fillers.push(<div key='none'>no leadlink assigned</div>)
           }
@@ -417,34 +476,28 @@ class Circle extends React.Component {
                   <Icon name='user add' link onClick={() => { this.setRoleSetMember(r.uid) }} />
                 </span>
               } />
+          }
+              {r.roleType === 'circle' && canEdit && viewerPermissions.assignChildCircleLeadLink &&
+              <Popup content='Set Sircle Leader' trigger={
+                <span className='ui right floated'>
+                  <Icon name='user add' link onClick={() => { this.setRoleSetLeadLink(r.uid, leadlink.uid) }} />
+                </span>
+              } />
             }
-
-
-        {r.roleType === 'circle' && canEdit && viewerPermissions.assignChildCircleLeadLink &&
-                <Popup content='Set Sircle Leader' trigger={
-                  <span className='ui right floated'>
-                    <Icon name='user add' link onClick={() => { this.setRoleSetLeadLink(r.uid, leadlink.uid) }} />
-                  </span>
-                } />
-              }
-                <Card.Header>
-                  <Link to={roleLink}>
-                    {r.name} {r.name === 'Core Members' && <Icon inverted color='orange' name='selected radio'></Icon>}
-                  </Link>
-                  {r.roleType === 'circle' && <Label className='labelright' color='blue' horizontal basic size='tiny'>Circle</Label> }
-                </Card.Header>
-              </Card.Content>
-              <Card.Content>
-                <Card.Description>
-                  <List>
-                    {fillers}
-                  </List>
-                </Card.Description>
-              </Card.Content>
-            </Card>
-          )
-        }
-        
+              <Card.Header>
+                <Link to={roleLink}>
+                  {r.name}{r.name === 'Core Members' && <Icon inverted color='orange' name='selected radio'></Icon>}
+                </Link>
+                {r.roleType === 'circle' && <Label className='labelright' color='blue' horizontal basic size='tiny'>Circle</Label> }
+              </Card.Header>
+            </Card.Content>
+            <Card.Content>
+              <Card.Description>
+                {fillers}
+              </Card.Description>
+            </Card.Content>
+          </Card>
+        )
       }
 
       tab =
@@ -479,7 +532,11 @@ class Circle extends React.Component {
                       <Table.Cell>
                         <Link to={Util.memberUrl(t.member.uid, timeLine)}>
                           <Avatar uid={t.member.uid} size={30} inline spaced shape='rounded' />
-                          {t.member.userName}
+                          <Popup content={t.member.fullName} trigger={
+                            <span>
+                              {t.member.userName}
+                            </span>
+                          } />
                         </Link>
                       </Table.Cell>
                       <Table.Cell>
@@ -505,6 +562,16 @@ class Circle extends React.Component {
         deletableRoles.push(r)
       }
 
+      // We hide these standard core roles: replink, facilitator, secretary
+      let editableRoles = []
+      for (let i = 0; i < role.roles.length; i++) {
+        const r = role.roles[i]
+        const roleType = r.roleType
+        if (roleType === 'facilitator' || roleType === 'replink' || roleType == 'secretary') continue
+        editableRoles.push(r)
+      }
+ 
+
       tab =
         <Segment>
           <Grid stackable columns={3}>
@@ -518,7 +585,7 @@ class Circle extends React.Component {
                   <Dropdown.Menu>
                     {/* <i class="add user icon"></i> */}
                     <Dropdown.Menu scrolling >
-                      {role.roles.map((role) => <Dropdown.Item key={role.uid} text={role.name} onClick={() => { this.setChildRoleUpdate(role) }} />)}
+                      {editableRoles.map((role) => <Dropdown.Item key={role.uid} text={role.name} onClick={() => { this.setChildRoleUpdate(role) }} />)}
                     </Dropdown.Menu>
                   </Dropdown.Menu>
                 </Dropdown>
@@ -637,7 +704,11 @@ class Circle extends React.Component {
                     <Table.Cell>
                       <Link to={Util.memberUrl(e.issuer.uid, timeLine)}>
                         <Avatar uid={e.issuer.uid} size={30} inline spaced shape='rounded' />
-                        {e.issuer.userName}
+                        <Popup content={e.issuer.fullName} trigger={
+                          <span>
+                            {e.issuer.userName}
+                          </span>
+                        } />
                       </Link>
                       {' did some changes'}
                     </Table.Cell>

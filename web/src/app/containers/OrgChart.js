@@ -161,7 +161,10 @@ class OrgChart extends React.Component {
 
       // We hide custom core members role named 'Core Members'
       if (node.data.name === 'Core Members') return
-        
+
+      // We hide these standard core roles: replink, facilitator, secretary
+      if (node.data.roleType === 'replink' || node.data.roleType === 'facilitator' || node.data.roleType === 'secretary') return
+
 
       const x = (node.x - ix) * k
       const y = (node.y - iy) * k
@@ -175,6 +178,11 @@ class OrgChart extends React.Component {
       if (node.data.roleType === 'leadlink' ||
       node.data.roleType === 'replink' ||
       node.data.roleType === 'facilitator' ||
+      node.data.roleType === 'engager' ||
+      node.data.roleType === 'champion' ||
+      node.data.roleType === 'scout' ||
+      node.data.roleType === 'magister' ||
+      node.data.roleType === 'mangler' ||
       node.data.roleType === 'secretary') {
         fill = d3.color('#9cd8ff')
       } else if (node.data.roleType === 'circle') {
@@ -213,8 +221,12 @@ class OrgChart extends React.Component {
     return nodes.map(node => {
       if (node.data.type !== 'title' && node.data.type !== 'role') return
 
+
       // We hide custom core members role named 'Core Members'
       if (node.data.name === 'Core Members') return
+
+      if (node.data.roleType === 'replink' || node.data.roleType === 'facilitator' || node.data.roleType === 'secretary') return
+
 
       if (node.data.depth - zoomnode.data.depth > 2) return
 
