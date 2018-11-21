@@ -1257,7 +1257,8 @@ func (r *RolesTree) circleUnsetCoreRoleMember(tx *db.Tx, roleType models.RoleTyp
 		return nil, nil
 	}
 
-	events = append(events, ep.NewEventCircleCoreRoleMemberUnset(roleID, coreRole.ID, coreRoleMemberID[0], roleType))
+	// Allow more then one member for core roles
+	// events = append(events, ep.NewEventCircleCoreRoleMemberUnset(roleID, coreRole.ID, coreRoleMemberID[0], roleType))
 
 	return events, nil
 }
