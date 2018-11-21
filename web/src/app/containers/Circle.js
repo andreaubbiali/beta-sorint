@@ -283,31 +283,37 @@ class Circle extends React.Component {
         const r = coreRoles[i]
         const roleType = r.roleType
 
-        let roleMember
         let expireInfo = "doesn't expire"
-        let filler = ''
-        if (r.roleMembers.length > 0) {
-          roleMember = r.roleMembers[0]
-        }
+        let fillers = []
 
-        if (roleMember) {
-          let member = r.roleMembers[0].member
-          const memberLink = Util.memberUrl(member.uid, timeLine)
-          const isCustomCore = (sorintCoreMemberIds.indexOf(member.uid) >= 0);
-          filler =
-            <Link to={memberLink}>
-              <Avatar uid={member.uid} size={30} inline spaced shape='rounded' />
-              <Popup content={member.fullName} trigger={
-                <span>
-                  {member.userName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
-                </span>
-              } />
-            </Link>
-          if (moment.utc(roleMember.electionExpiration).isValid()) {
-            expireInfo = 'expires on ' + moment.utc(roleMember.electionExpiration).format('L')
+        if (r.roleMembers.length === 0) {
+          fillers.push('not filled')
+        }
+        else
+        {
+          // show more the one member for core role
+          for (let i = 0, len = r.roleMembers.length; i < len; i++) {
+            let member = r.roleMembers[i].member
+            const memberLink = Util.memberUrl(member.uid, timeLine)
+            const isCustomCore = (sorintCoreMemberIds.indexOf(member.uid) >= 0);
+            fillers.push(
+              <List.Item key={member.uid}>
+                <Link to={memberLink}>
+                  <Avatar uid={member.uid} size={30} inline spaced shape='rounded' />
+                  <Popup content={member.fullName} trigger={
+                    <span>
+                      {member.userName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                    </span>
+                  } />
+                </Link>
+              </List.Item>
+            )
           }
-        } else {
-          filler = 'not filled'
+
+          // show expiration date
+          if (moment.utc(r.roleMembers[0].electionExpiration).isValid()) {
+            expireInfo = 'expires on ' + moment.utc(r.roleMembers[0].electionExpiration).format('L')
+          }
         }
 
         const roleLink = Util.roleUrl(r.uid, timeLine)
@@ -316,18 +322,18 @@ class Circle extends React.Component {
           <Card key={r.uid}>
             <Card.Content style={{'flexGrow': 0}}>
               { roleType === 'leadlink' && canEdit && viewerPermissions.assignRootCircleLeadLink &&
-              <Popup className='ui' content='Manage Sircle Leader' trigger={
-                <span className='ui right floated'>
-                  <Icon name='user add' link onClick={() => { this.setSetCoreRoleMember(r.uid, roleType) }} />
-                </span>
-              } />
+                <Popup className='ui' content='Manage Sircle Leader' trigger={
+                  <span className='ui right floated'>
+                    <Icon name='user add' link onClick={() => { this.setSetCoreRoleMember(r.uid, roleType) }} />
+                  </span>
+                } />
               }
               { roleType !== 'leadlink' && canEdit && viewerPermissions.assignCircleCoreRoles &&
-              <Popup className='ui' content='Manage Core Role' trigger={
-                <span className='ui right floated'>
-                  <Icon name='user add' link onClick={() => { this.setSetCoreRoleMember(r.uid, roleType) }} />
-                </span>
-              } />
+                <Popup className='ui' content='Manage Core Role' trigger={
+                  <span className='ui right floated'>
+                    <Icon name='user add' link onClick={() => { this.setSetCoreRoleMember(r.uid, roleType) }} />
+                  </span>
+                } />
               }
               <Card.Header>
                 <Link to={roleLink}>
@@ -337,10 +343,12 @@ class Circle extends React.Component {
             </Card.Content>
             <Card.Content>
               <Card.Description>
-                {filler}
+                <List>
+                  {fillers}
+                </List>
               </Card.Description>
             </Card.Content>
-            { roleType !== 'leadlink' && roleMember &&
+            { roleType !== 'leadlink' && r.roleMembers[0] &&
               <Card.Content extra>
                 {expireInfo}
               </Card.Content>
