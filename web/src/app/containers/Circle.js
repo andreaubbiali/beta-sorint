@@ -202,9 +202,9 @@ class Circle extends React.Component {
                   <Avatar uid={d.member.uid} size={50} floated='right' inline spaced shape='rounded' />
                   <Card.Header>
                     <Link to={Util.memberUrl(d.member.uid, timeLine)}>
-                    <Popup content={d.member.fullName} trigger={
+                    <Popup content={d.member.userName} trigger={
                       <span>
-                        {d.member.userName}{d.customCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                        {d.member.fullName}{d.customCore && <Icon inverted color='orange' name='selected radio'></Icon>}
                       </span>
                     } />
                     </Link>
@@ -228,9 +228,9 @@ class Circle extends React.Component {
                   <Avatar uid={d.member.uid} size={50} floated='right' inline spaced shape='rounded' />
                   <Card.Header>
                     <Link to={Util.memberUrl(d.member.uid, timeLine)}>
-                      <Popup content={d.member.fullName} trigger={
+                      <Popup content={d.member.userName} trigger={
                         <span>
-                          {d.member.userName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                          {d.member.fullName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
                         </span>
                       } />
                     </Link>
@@ -309,7 +309,7 @@ class Circle extends React.Component {
               </List.Item>
             )
           }
-
+          
           // show expiration date
           if (moment.utc(r.roleMembers[0].electionExpiration).isValid()) {
             expireInfo = 'expires on ' + moment.utc(r.roleMembers[0].electionExpiration).format('L')
@@ -379,16 +379,16 @@ class Circle extends React.Component {
             if (focus) {
               focusString = ` (${focus})`
             }
-            
+
             const memberLink = Util.memberUrl(member.uid, timeLine)
             const isCustomCore = (sorintCoreMemberIds.indexOf(member.uid) >= 0)
             extras.push(
               <List.Item key={member.uid}>
                 <Link to={memberLink}>
                   <Avatar uid={member.uid} size={30} inline spaced shape='rounded' />
-                  <Popup content={member.fullName} trigger={
+                  <Popup content={member.userName} trigger={
                     <span>
-                      {member.userName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                      {member.fullName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
                     </span>
                   } />
                 </Link>
@@ -416,9 +416,9 @@ class Circle extends React.Component {
                 <List.Item key={extramember.uid}>
                   <Link to={extramemberLink}>
                     <Avatar uid={extramember.uid} size={30} inline spaced shape='rounded' />
-                    <Popup content={extramember.fullName} trigger={
+                    <Popup content={extramember.userName} trigger={
                       <span>
-                        {extramember.userName} {isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                        {extramember.fullName} {isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
                       </span>
                     } />
                   </Link>
@@ -460,7 +460,7 @@ class Circle extends React.Component {
                 <List.Item key={leadlinkMember.uid}>
                   <Link to={memberLink}>
                     <Avatar uid={leadlinkMember.uid} size={30} inline spaced shape='rounded' />
-                   {leadlinkMember.userName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
+                   {leadlinkMember.fullName}{isCustomCore && <Icon inverted color='orange' name='selected radio'></Icon>}
                  </Link>
                   <span> (Sircle Leader)</span>
                 </List.Item>
@@ -543,9 +543,9 @@ class Circle extends React.Component {
                       <Table.Cell>
                         <Link to={Util.memberUrl(t.member.uid, timeLine)}>
                           <Avatar uid={t.member.uid} size={30} inline spaced shape='rounded' />
-                          <Popup content={t.member.fullName} trigger={
+                          <Popup content={t.member.userName} trigger={
                             <span>
-                              {t.member.userName}
+                              {t.member.fullName}
                             </span>
                           } />
                         </Link>
@@ -581,7 +581,7 @@ class Circle extends React.Component {
         if (roleType === 'facilitator' || roleType === 'replink' || roleType == 'secretary') continue
         editableRoles.push(r)
       }
- 
+
 
       tab =
         <Segment>
@@ -715,9 +715,9 @@ class Circle extends React.Component {
                     <Table.Cell>
                       <Link to={Util.memberUrl(e.issuer.uid, timeLine)}>
                         <Avatar uid={e.issuer.uid} size={30} inline spaced shape='rounded' />
-                        <Popup content={e.issuer.fullName} trigger={
+                        <Popup content={e.issuer.userName} trigger={
                           <span>
-                            {e.issuer.userName}
+                            {e.issuer.fullName}
                           </span>
                         } />
                       </Link>

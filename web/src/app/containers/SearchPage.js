@@ -70,9 +70,9 @@ class SearchPage extends React.Component {
               <Segment>
                 <Link to={memberLink}>
                   <Avatar uid={hit.id} size={30} inline spaced shape='rounded' />
-                  <Popup content={hit.fields.FullName} trigger={
+                  <Popup content={hit.fields.UserName} trigger={
                     <span>
-                      {hit.fields.UserName}
+                      {hit.fields.FullName}
                     </span>
                   } />
                 </Link>
