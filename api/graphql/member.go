@@ -291,3 +291,41 @@ func (r *updateMemberChangeErrorsResolver) FullName() *string {
 func (r *updateMemberChangeErrorsResolver) Email() *string {
 	return errorToStringP(r.r.Email)
 }
+
+
+
+type updateMemberResultResolverDisable struct {
+	s          readdb.ReadDBService
+	member     *models.Member
+	res        *change.UpdateMemberResultDisable
+	timeLineID util.TimeLineNumber
+
+	dataLoaders *dataloader.DataLoaders
+}
+
+func (r *updateMemberResultResolverDisable) Member() *memberResolver {
+	if r.member == nil {
+		return nil
+	}
+	return &memberResolver{r.s, r.member, r.timeLineID, r.dataLoaders}
+}
+
+func (r *updateMemberResultResolverDisable) HasErrors() bool {
+	return r.res.HasErrors
+}
+
+func (r *updateMemberResultResolverDisable) GenericError() *string {
+	return errorToStringP(r.res.GenericError)
+}
+
+func (r *updateMemberResultResolverDisable) UpdateMemberChangeErrorsDisable() *updateMemberChangeErrorsResolverDisable {
+	return &updateMemberChangeErrorsResolverDisable{r: r.res.UpdateMemberChangeErrorsDisable}
+}
+
+type updateMemberChangeErrorsResolverDisable struct {
+	r change.UpdateMemberChangeErrorsDisable
+}
+
+func (r *updateMemberChangeErrorsResolverDisable) UserName() *string {
+	return errorToStringP(r.r.UserName)
+}

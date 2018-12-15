@@ -20,6 +20,10 @@ func NewMemberChangeRepository(es *eventstore.EventStore, uidGenerator common.UI
 	return &MemberChangeRepository{es: es, uidGenerator: uidGenerator}
 }
 
+func NewMemberChangeRepositoryDisable(es *eventstore.EventStore, uidGenerator common.UIDGenerator) *MemberChangeRepository {
+	return &MemberChangeRepository{es: es, uidGenerator: uidGenerator}
+}
+
 func (mr *MemberChangeRepository) Load(id util.ID) (*MemberChange, error) {
 	log.Debugf("Load id: %s", id)
 	m, err := NewMemberChange(mr.es, mr.uidGenerator, id)
@@ -78,6 +82,8 @@ func (m *MemberChange) HandleCommand(command *commands.Command) ([]ep.Event, err
 		events, err = m.HandleRequestCreateMemberCommand(command)
 	case commands.CommandTypeRequestUpdateMember:
 		events, err = m.HandleRequestUpdateMemberCommand(command)
+	case commands.CommandTypeRequestUpdateMemberDisable:
+		events, err = m.HandleRequestUpdateMemberCommandDisable(command)
 	case commands.CommandTypeRequestSetMemberMatchUID:
 		events, err = m.HandleRequestSetMemberMatchUIDCommand(command)
 	case commands.CommandTypeCompleteRequest:
@@ -122,6 +128,21 @@ func (m *MemberChange) HandleRequestUpdateMemberCommand(command *commands.Comman
 	member.ID = c.MemberID
 
 	events = append(events, ep.NewEventMemberChangeUpdateRequested(m.id, member, c.Avatar, c.PrevUserName, c.PrevEmail))
+
+	return events, nil
+}
+
+func (m *MemberChange) HandleRequestUpdateMemberCommandDisable(command *commands.Command) ([]ep.Event, error) {
+	events := []ep.Event{}
+
+	c := command.Data.(*commands.RequestUpdateMemberDisable)
+
+	member := &models.Member{
+		UserName: c.UserName,
+	}
+	member.ID = c.MemberID
+
+	events = append(events, ep.NewEventMemberChangeUpdateRequestedDisable(m.id, member, c.PrevUserName))
 
 	return events, nil
 }

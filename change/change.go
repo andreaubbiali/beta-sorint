@@ -189,6 +189,21 @@ type CreateMemberChangeErrors struct {
 	AvatarData error
 }
 
+type UpdateMemberChangeDisable struct{
+	ID         util.ID
+	UserName   string
+}
+
+type UpdateMemberResultDisable struct {
+	HasErrors                bool
+	GenericError             error
+	UpdateMemberChangeErrorsDisable UpdateMemberChangeErrorsDisable
+}
+
+type UpdateMemberChangeErrorsDisable struct {
+	UserName   error
+}
+
 type UpdateMemberChange struct {
 	ID         util.ID
 	IsAdmin    bool

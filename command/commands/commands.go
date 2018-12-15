@@ -31,10 +31,12 @@ const (
 
 	CommandTypeRequestCreateMember      CommandType = "RequestCreateMember"
 	CommandTypeRequestUpdateMember      CommandType = "RequestUpdateMember"
+	CommandTypeRequestUpdateMemberDisable      CommandType = "RequestUpdateMemberDisable"
 	CommandTypeRequestSetMemberMatchUID CommandType = "RequestSetMemberMatchUID"
 
 	CommandTypeCreateMember      CommandType = "CreateMember"
 	CommandTypeUpdateMember      CommandType = "UpdateMember"
+	CommandTypeUpdateMemberDisable      CommandType = "UpdateMemberDisable"
 	CommandTypeDeleteMember      CommandType = "DeleteMember"
 	CommandTypeSetMemberPassword CommandType = "SetMemberPassword"
 	CommandTypeSetMemberMatchUID CommandType = "SetMemberMatchUID"
@@ -210,6 +212,34 @@ func NewCommandUpdateMember(c *change.UpdateMemberChange, memberChangeID util.ID
 		MemberChangeID: memberChangeID,
 		PrevUserName:   prevUserName,
 		PrevEmail:      prevEmail,
+	}
+}
+
+type RequestUpdateMemberDisable struct {
+	MemberID     util.ID
+	UserName     string
+	PrevUserName string
+}
+
+func NewCommandRequestUpdateMemberDisable(c *change.UpdateMemberChangeDisable, memberID util.ID, prevUserName string) *RequestUpdateMemberDisable {
+	return &RequestUpdateMemberDisable{
+		MemberID:     memberID,
+		UserName:     c.UserName,
+		PrevUserName: prevUserName,
+	}
+}
+
+type UpdateMemberDisable struct {
+	UserName       string
+	MemberChangeID util.ID
+	PrevUserName   string
+}
+
+func NewCommandUpdateMemberDisable(c *change.UpdateMemberChangeDisable, memberChangeID util.ID, prevUserName string) *UpdateMemberDisable {
+	return &UpdateMemberDisable{
+		UserName:       c.UserName,
+		MemberChangeID: memberChangeID,
+		PrevUserName:   prevUserName,
 	}
 }
 

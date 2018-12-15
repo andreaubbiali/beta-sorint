@@ -2872,6 +2872,20 @@ func (h *DBEventHandler) handleEvent(event *eventstore.StoredEvent, tx *db.Tx, s
 			return err
 		}
 
+	case ep.EventTypeMemberUpdatedDisable:
+		data := data.(*ep.EventMemberUpdatedDisable)
+		memberID, err := util.IDFromString(event.StreamID)
+		if err != nil {
+			return err
+		}
+
+		member := &models.Member{
+			UserName: data.UserName,
+		}
+		if err := s.updateVertex(tl.Number(), vertexClassMember, memberID, member); err != nil {
+			return err
+		}
+
 	case ep.EventTypeMemberPasswordSet:
 		data := data.(*ep.EventMemberPasswordSet)
 		memberID, err := util.IDFromString(event.StreamID)
@@ -2907,6 +2921,7 @@ func (h *DBEventHandler) handleEvent(event *eventstore.StoredEvent, tx *db.Tx, s
 
 	case ep.EventTypeMemberChangeCreateRequested:
 	case ep.EventTypeMemberChangeUpdateRequested:
+	case ep.EventTypeMemberChangeUpdateRequestedDisable:
 	case ep.EventTypeMemberChangeSetMatchUIDRequested:
 	case ep.EventTypeMemberChangeCompleted:
 
@@ -3222,6 +3237,9 @@ func (h *DBEventHandler) handleEvent(event *eventstore.StoredEvent, tx *db.Tx, s
 	case ep.EventTypeMemberUpdated:
 		//data := data.(*ep.EventMemberUpdated)
 
+	case ep.EventTypeMemberUpdatedDisable:
+		//data := data.(*ep.EventMemberUpdatedDisable)
+
 	case ep.EventTypeMemberPasswordSet:
 		//data := data.(*ep.EventMemberPasswordSet)
 
@@ -3230,6 +3248,7 @@ func (h *DBEventHandler) handleEvent(event *eventstore.StoredEvent, tx *db.Tx, s
 
 	case ep.EventTypeMemberChangeCreateRequested:
 	case ep.EventTypeMemberChangeUpdateRequested:
+	case ep.EventTypeMemberChangeUpdateRequestedDisable:
 	case ep.EventTypeMemberChangeSetMatchUIDRequested:
 	case ep.EventTypeMemberChangeCompleted:
 

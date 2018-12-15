@@ -82,6 +82,8 @@ func (m *Member) HandleCommand(command *commands.Command) ([]ep.Event, error) {
 		events, err = m.HandleCreateMemberCommand(command)
 	case commands.CommandTypeUpdateMember:
 		events, err = m.HandleUpdateMemberCommand(command)
+	case commands.CommandTypeUpdateMemberDisable:
+		events, err = m.HandleUpdateMemberCommandDisable(command)
 	case commands.CommandTypeSetMemberPassword:
 		events, err = m.HandleSetMemberPasswordCommand(command)
 	case commands.CommandTypeSetMemberMatchUID:
@@ -171,6 +173,34 @@ func (m *Member) HandleUpdateMemberCommand(command *commands.Command) ([]ep.Even
 	return events, nil
 }
 
+func (m *Member) HandleUpdateMemberCommandDisable(command *commands.Command) ([]ep.Event, error) {
+	events := []ep.Event{}
+
+	c := command.Data.(*commands.UpdateMemberDisable)
+
+	if _, ok := m.updateRequests[c.MemberChangeID]; ok {
+		return nil, nil
+	}
+
+	// if not created return an error
+	if !m.created {
+		return nil, fmt.Errorf("unexistent member")
+	}
+
+	if m.userName != c.PrevUserName {
+		return nil, errors.Errorf("consistency error: prevUserName: %q != userName: %q", c.PrevUserName, m.userName)
+	}
+
+	member := &models.Member{
+		UserName: c.UserName,
+	}
+	member.ID = m.id
+
+	events = append(events, ep.NewEventMemberUpdatedDisable(member, c.MemberChangeID, m.userName))
+
+	return events, nil
+}
+
 func (m *Member) HandleSetMemberPasswordCommand(command *commands.Command) ([]ep.Event, error) {
 	events := []ep.Event{}
 
@@ -235,6 +265,12 @@ func (m *Member) ApplyEvent(event *eventstore.StoredEvent) error {
 		m.email = data.Email
 		m.isAdmin = data.IsAdmin
 
+		m.updateRequests[data.MemberChangeID] = struct{}{}
+
+	case ep.EventTypeMemberUpdatedDisable:
+		data := data.(*ep.EventMemberUpdatedDisable)
+
+		m.userName = data.UserName
 		m.updateRequests[data.MemberChangeID] = struct{}{}
 
 	case ep.EventTypeMemberMatchUIDSet:

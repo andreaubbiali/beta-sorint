@@ -91,6 +91,7 @@ var Schema = `
 
 		createMember(createMemberChange: CreateMemberChange): CreateMemberResult
 		updateMember(updateMemberChange: UpdateMemberChange): UpdateMemberResult
+		updateMemberDisable(updateMemberChangeDisable: UpdateMemberChangeDisable): UpdateMemberResultDisable
 		setMemberPassword(memberUID: ID!, curPassword: String, newPassword: String!): GenericResult
 		setMemberMatchUID(memberUID: ID!, matchUID: String!): GenericResult
 		importMember(loginName: String!): Member
@@ -465,6 +466,22 @@ var Schema = `
 		fullName: String
 		email: String
 		password: String
+	}
+
+	input UpdateMemberChangeDisable{
+		uid: ID!
+		userName: String!
+	}
+
+	type UpdateMemberResultDisable {
+		member: Member
+		hasErrors: Boolean!
+		genericError: String
+		updateMemberChangeErrorsDisable: UpdateMemberChangeErrorsDisable
+	}
+
+	type UpdateMemberChangeErrorsDisable {
+		userName: String
 	}
 
 	input UpdateMemberChange  {
@@ -1153,6 +1170,25 @@ func (m *CreateMemberChange) toCommandChange() (*change.CreateMemberChange, erro
 		}
 	}
 
+	return mm, nil
+}
+
+type UpdateMemberChangeDisable struct{
+	UID        graphql.ID
+	UserName   string
+}
+
+func (m *UpdateMemberChangeDisable) toCommandChange() (*change.UpdateMemberChangeDisable, error) {
+	mm := &change.UpdateMemberChangeDisable{}
+
+	id, err := unmarshalUID(m.UID)
+	if err != nil {
+		return nil, err
+	}
+	mm.ID = id
+
+	mm.UserName = m.UserName
+	
 	return mm, nil
 }
 
@@ -1896,6 +1932,49 @@ func (r *Resolver) CreateMember(ctx context.Context, args *struct {
 		}
 	}
 	return &createMemberResultResolver{readdb, member, res, tl.Number(), dataloader.NewDataLoaders(ctx, readdb)}, nil
+}
+
+func (r *Resolver) UpdateMemberDisable(ctx context.Context, args *struct {
+	UpdateMemberChangeDisable *UpdateMemberChangeDisable
+}) (*updateMemberResultResolverDisable, error) {
+	readDBListener := ctx.Value("readdblistener").(readdb.ReadDBListener)
+	cs := ctx.Value("commandservice").(*command.CommandService)
+
+	mr, err := args.UpdateMemberChangeDisable.toCommandChange()
+	if err != nil {
+		return nil, err
+	}
+
+	res, groupID, err := cs.UpdateMemberDisable(ctx, mr)
+	if err != nil && err != command.ErrValidation {
+		return nil, err
+	}
+	if err == command.ErrValidation {
+		return &updateMemberResultResolverDisable{nil, nil, res, -1, nil}, nil
+	}
+
+	if _, err := readDBListener.WaitTimeLineForGroupID(ctx, groupID); err != nil {
+		return nil, err
+	}
+
+	readdb, err := r.setupReadDB(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tl, err := readdb.TimeLineForGroupID(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+
+	var member *models.Member
+	if err == nil {
+		member, err = readdb.Member(ctx, tl.Number(), mr.ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &updateMemberResultResolverDisable{readdb, member, res, tl.Number(), dataloader.NewDataLoaders(ctx, readdb)}, nil
 }
 
 func (r *Resolver) UpdateMember(ctx context.Context, args *struct {

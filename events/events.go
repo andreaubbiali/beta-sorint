@@ -108,12 +108,14 @@ const (
 	// MemberChange Aggregate
 	EventTypeMemberChangeCreateRequested      EventType = "MemberChangeCreateRequested"
 	EventTypeMemberChangeUpdateRequested      EventType = "MemberChangeUpdateRequested"
+	EventTypeMemberChangeUpdateRequestedDisable      EventType = "MemberChangeUpdateRequestedDisable"
 	EventTypeMemberChangeSetMatchUIDRequested EventType = "MemberChangeSetMatchUIDRequested"
 	EventTypeMemberChangeCompleted            EventType = "MemberChangeCompleted"
 
 	// Member Aggregate
 	EventTypeMemberCreated     EventType = "MemberCreated"
 	EventTypeMemberUpdated     EventType = "MemberUpdated"
+	EventTypeMemberUpdatedDisable     EventType = "MemberUpdatedDisable"
 	EventTypeMemberDeleted     EventType = "MemberDeleted"
 	EventTypeMemberPasswordSet EventType = "MemberPasswordSet"
 	EventTypeMemberAvatarSet   EventType = "MemberAvatarSet"
@@ -190,6 +192,8 @@ func GetEventDataType(eventType EventType) interface{} {
 		return &EventMemberChangeCreateRequested{}
 	case EventTypeMemberChangeUpdateRequested:
 		return &EventMemberChangeUpdateRequested{}
+	case EventTypeMemberChangeUpdateRequestedDisable:
+		return &EventMemberChangeUpdateRequestedDisable{}
 	case EventTypeMemberChangeSetMatchUIDRequested:
 		return &EventMemberChangeSetMatchUIDRequested{}
 	case EventTypeMemberChangeCompleted:
@@ -199,6 +203,8 @@ func GetEventDataType(eventType EventType) interface{} {
 		return &EventMemberCreated{}
 	case EventTypeMemberUpdated:
 		return &EventMemberUpdated{}
+	case EventTypeMemberUpdatedDisable:
+		return &EventMemberUpdatedDisable{}
 	case EventTypeMemberPasswordSet:
 		return &EventMemberPasswordSet{}
 	case EventTypeMemberAvatarSet:
@@ -724,6 +730,25 @@ func (e *EventMemberChangeUpdateRequested) EventType() EventType {
 	return EventTypeMemberChangeUpdateRequested
 }
 
+type EventMemberChangeUpdateRequestedDisable struct {
+	MemberID util.ID
+	UserName string
+
+	PrevUserName string
+}
+
+func NewEventMemberChangeUpdateRequestedDisable(memberChangeID util.ID, member *models.Member, prevUserName string) *EventMemberChangeUpdateRequestedDisable {
+	return &EventMemberChangeUpdateRequestedDisable{
+		MemberID:     member.ID,
+		UserName:     member.UserName,
+		PrevUserName: prevUserName,
+	}
+}
+
+func (e *EventMemberChangeUpdateRequestedDisable) EventType() EventType {
+	return EventTypeMemberChangeUpdateRequestedDisable
+}
+
 type EventMemberChangeSetMatchUIDRequested struct {
 	MemberID util.ID
 	MatchUID string
@@ -805,6 +830,24 @@ func NewEventMemberUpdated(member *models.Member, memberChangeID util.ID, prevUs
 
 func (e *EventMemberUpdated) EventType() EventType {
 	return EventTypeMemberUpdated
+}
+
+type EventMemberUpdatedDisable struct {
+	UserName string
+	MemberChangeID util.ID
+	PrevUserName string
+}
+
+func NewEventMemberUpdatedDisable(member *models.Member, memberChangeID util.ID, prevUserName string) *EventMemberUpdatedDisable {
+	return &EventMemberUpdatedDisable{
+		UserName:       member.UserName,
+		MemberChangeID: memberChangeID,
+		PrevUserName:   prevUserName,
+	}
+}
+
+func (e *EventMemberUpdatedDisable) EventType() EventType {
+	return EventTypeMemberUpdatedDisable
 }
 
 type EventMemberPasswordSet struct {
