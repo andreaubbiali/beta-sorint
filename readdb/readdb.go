@@ -2873,16 +2873,16 @@ func (h *DBEventHandler) handleEvent(event *eventstore.StoredEvent, tx *db.Tx, s
 		}
 
 	case ep.EventTypeMemberUpdatedDisable:
-		data := data.(*ep.EventMemberUpdatedDisable)
+		// data := data.(*ep.EventMemberUpdatedDisable)
 		memberID, err := util.IDFromString(event.StreamID)
 		if err != nil {
 			return err
 		}
 
-		member := &models.Member{
-			UserName: data.UserName,
-		}
-		if err := s.updateVertex(tl.Number(), vertexClassMember, memberID, member); err != nil {
+		// member := &models.Member{
+		// 	UserName: data.UserName,
+		// }
+		if err := s.closeVertex(tl.Number()-1, vertexClassMember, memberID); err != nil {
 			return err
 		}
 
