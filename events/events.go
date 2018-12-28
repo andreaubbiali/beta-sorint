@@ -732,13 +732,11 @@ func (e *EventMemberChangeUpdateRequested) EventType() EventType {
 
 type EventMemberChangeUpdateRequestedDisable struct {
 	MemberID util.ID
-	PrevUserName string
 }
 
-func NewEventMemberChangeUpdateRequestedDisable(memberChangeID util.ID, member *models.Member, prevUserName string) *EventMemberChangeUpdateRequestedDisable {
+func NewEventMemberChangeUpdateRequestedDisable(memberChangeID util.ID, member *models.Member) *EventMemberChangeUpdateRequestedDisable {
 	return &EventMemberChangeUpdateRequestedDisable{
 		MemberID:     member.ID,
-		PrevUserName: prevUserName,
 	}
 }
 
@@ -831,13 +829,11 @@ func (e *EventMemberUpdated) EventType() EventType {
 
 type EventMemberUpdatedDisable struct {
 	MemberChangeID util.ID
-	PrevUserName string
 }
 
-func NewEventMemberUpdatedDisable(member *models.Member, memberChangeID util.ID, prevUserName string) *EventMemberUpdatedDisable {
+func NewEventMemberUpdatedDisable(member *models.Member, memberChangeID util.ID) *EventMemberUpdatedDisable {
 	return &EventMemberUpdatedDisable{
 		MemberChangeID: memberChangeID,
-		PrevUserName:   prevUserName,
 	}
 }
 

@@ -141,7 +141,7 @@ func (m *MemberChange) HandleRequestUpdateMemberCommandDisable(command *commands
 	}
 	member.ID = c.MemberID
 
-	events = append(events, ep.NewEventMemberChangeUpdateRequestedDisable(m.id, member, c.PrevUserName))
+	events = append(events, ep.NewEventMemberChangeUpdateRequestedDisable(m.id, member))
 
 	return events, nil
 }

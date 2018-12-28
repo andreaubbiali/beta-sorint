@@ -297,7 +297,6 @@ func (s *MemberRequestSaga) HandleEvent(event *eventstore.StoredEvent) ([]ep.Eve
 		log.Debugf("updating memberID %s", data.MemberID)
 		command := commands.NewCommand(commands.CommandTypeUpdateMemberDisable, correlationID, causationID, util.NilID, &commands.UpdateMemberDisable{
 			MemberChangeID: memberChangeID,
-			PrevUserName:   data.PrevUserName,
 		})
 
 		_, _, err = aggregate.ExecCommand(command, m, s.es, s.uidGenerator)

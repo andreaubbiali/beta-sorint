@@ -187,15 +187,11 @@ func (m *Member) HandleUpdateMemberCommandDisable(command *commands.Command) ([]
 		return nil, fmt.Errorf("unexistent member")
 	}
 
-	if m.userName != c.PrevUserName {
-		return nil, errors.Errorf("consistency error: prevUserName: %q != userName: %q", c.PrevUserName, m.userName)
-	}
-
 	member := &models.Member{
 	}
 	member.ID = m.id
 
-	events = append(events, ep.NewEventMemberUpdatedDisable(member, c.MemberChangeID, m.userName))
+	events = append(events, ep.NewEventMemberUpdatedDisable(member, c.MemberChangeID))
 
 	return events, nil
 }

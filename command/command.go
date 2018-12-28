@@ -1098,11 +1098,9 @@ func (s *CommandService) UpdateMemberDisable(ctx context.Context, c *change.Upda
 		return res, util.NilID, ErrValidation
 	}
 
-	prevUserName := member.UserName
-
 	correlationID := s.uidGenerator.UUID("")
 	causationID := s.uidGenerator.UUID("")
-	command := commands.NewCommand(commands.CommandTypeRequestUpdateMemberDisable, correlationID, causationID, callingMember.ID, commands.NewCommandRequestUpdateMemberDisable(c, member.ID, prevUserName))
+	command := commands.NewCommand(commands.CommandTypeRequestUpdateMemberDisable, correlationID, causationID, callingMember.ID, commands.NewCommandRequestUpdateMemberDisable(c, member.ID))
 
 	memberChangeID := s.uidGenerator.UUID("")
 	mcr := aggregate.NewMemberChangeRepositoryDisable(s.es, s.uidGenerator)

@@ -19,8 +19,6 @@ class EditMember extends React.Component {
       this.setState({ curMember: curMember })
     }
 
-    this.setState({ isOpenDisableMember: false })
-    this.setState({ profileDisabled: false })
   }
 
   componentWillReceiveProps (nextProps) {
@@ -78,7 +76,9 @@ class EditMember extends React.Component {
       avatarError: null,
       profileCreated: false,
       profileUpdated: false,
-      profileDisabled: false, })
+      profileDisabled: false,
+      isOpenDisableMember: false,
+      profileDisabled: false })
   }
 
   cloneMember = (member) => {
