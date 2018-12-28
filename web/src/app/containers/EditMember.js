@@ -20,7 +20,7 @@ class EditMember extends React.Component {
     }
 
     this.setState({ isOpenDisableMember: false })
-
+    this.setState({ profileDisabled: false })
   }
 
   componentWillReceiveProps (nextProps) {
@@ -77,7 +77,8 @@ class EditMember extends React.Component {
       passwordError: null,
       avatarError: null,
       profileCreated: false,
-      profileUpdated: false })
+      profileUpdated: false,
+      profileDisabled: false, })
   }
 
   cloneMember = (member) => {
@@ -258,15 +259,12 @@ class EditMember extends React.Component {
     const { curMember, file, cropData } = this.state
 
       let updateMemberChangeDisable =
-        {
-          uid: curMember.uid,
-          userName: curMember.userName
-        }
+      {
+        uid: curMember.uid
+      }
 
       console.log('updateMemberChangeDisable', updateMemberChangeDisable)
 
-
-      //da togliere quando end_tl
       this.setState({submitting: true})
       this.props.updateMemberDisable(updateMemberChangeDisable)
     .then(({ data }) => {
@@ -276,13 +274,8 @@ class EditMember extends React.Component {
         if (data.updateMemberDisable.genericError) {
           this.setState({showError: true, errorMessage: data.updateMemberDisable.genericError})
         }
-
-        ///da togliere quando end_tl
-        if (data.updateMemberDisable.updateMemberChangeErrorsDisable.userName) {
-          this.setState({userNameError: data.updateMemberDisable.updateMemberChangeErrorsDisable.userName})
-        }
       } else {
-        this.setState({profileUpdated: true})
+        this.setState({profileDisabled: true})
       }
     }).catch((error) => {
       this.setState({submitting: false})
@@ -404,7 +397,7 @@ class EditMember extends React.Component {
 
     const viewer = viewerQuery.viewer
     const { mode, type } = this.props
-    const { submitting, curMember, imagePreviewUrl, cropping, crop, avatarUpdated, croppedAvatar, showError, errorMessage, userNameError, fullNameError, emailError, passwordError, profileCreated, profileUpdated } = this.state
+    const { submitting, curMember, imagePreviewUrl, cropping, crop, avatarUpdated, croppedAvatar, showError, errorMessage, userNameError, fullNameError, emailError, passwordError, profileCreated, profileUpdated, profileDisabled } = this.state
 
     let title
     let submitText
@@ -435,6 +428,14 @@ class EditMember extends React.Component {
       return (
         <Message positive>
           <span>Profile successfully updated</span>
+        </Message>
+      )
+    }
+
+    if (profileDisabled) {
+      return (
+        <Message positive>
+          <span>Profile successfully disabled</span>
         </Message>
       )
     }
@@ -576,12 +577,8 @@ const updateMemberDisable = gql`
     updateMemberDisable(updateMemberChangeDisable: $updateMemberChangeDisable) {
       hasErrors
       genericError
-      updateMemberChangeErrorsDisable {
-        userName
-      }
       member {
         uid
-        userName
       }
     }
   }

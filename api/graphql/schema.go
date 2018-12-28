@@ -470,7 +470,6 @@ var Schema = `
 
 	input UpdateMemberChangeDisable{
 		uid: ID!
-		userName: String!
 	}
 
 	type UpdateMemberResultDisable {
@@ -481,7 +480,6 @@ var Schema = `
 	}
 
 	type UpdateMemberChangeErrorsDisable {
-		userName: String
 	}
 
 	input UpdateMemberChange  {
@@ -1175,7 +1173,6 @@ func (m *CreateMemberChange) toCommandChange() (*change.CreateMemberChange, erro
 
 type UpdateMemberChangeDisable struct{
 	UID        graphql.ID
-	UserName   string
 }
 
 func (m *UpdateMemberChangeDisable) toCommandChange() (*change.UpdateMemberChangeDisable, error) {
@@ -1186,8 +1183,6 @@ func (m *UpdateMemberChangeDisable) toCommandChange() (*change.UpdateMemberChang
 		return nil, err
 	}
 	mm.ID = id
-
-	mm.UserName = m.UserName
 	
 	return mm, nil
 }

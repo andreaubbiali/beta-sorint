@@ -325,7 +325,3 @@ func (r *updateMemberResultResolverDisable) UpdateMemberChangeErrorsDisable() *u
 type updateMemberChangeErrorsResolverDisable struct {
 	r change.UpdateMemberChangeErrorsDisable
 }
-
-func (r *updateMemberChangeErrorsResolverDisable) UserName() *string {
-	return errorToStringP(r.r.UserName)
-}

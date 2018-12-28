@@ -1066,22 +1066,6 @@ func (s *CommandService) UpdateMember(ctx context.Context, c *change.UpdateMembe
 func (s *CommandService) UpdateMemberDisable(ctx context.Context, c *change.UpdateMemberChangeDisable) (*change.UpdateMemberResultDisable, util.ID, error) {
 	res := &change.UpdateMemberResultDisable{}
 
-	if c.UserName == "" {
-		res.HasErrors = true
-		res.UpdateMemberChangeErrorsDisable.UserName = errors.Errorf("empty user name")
-	} else {
-		if len([]rune(c.UserName)) < MinMemberUserNameLength {
-			res.HasErrors = true
-			res.UpdateMemberChangeErrorsDisable.UserName = errors.Errorf("user name too short")
-		} else if len([]rune(c.UserName)) > MaxMemberUserNameLength {
-			res.HasErrors = true
-			res.UpdateMemberChangeErrorsDisable.UserName = errors.Errorf("user name too long")
-		} else if !isUserNameValidFormat(c.UserName) {
-			res.HasErrors = true
-			res.UpdateMemberChangeErrorsDisable.UserName = errors.Errorf("invalid user name")
-		}
-	}
-
 	tx, err := s.db.NewTx()
 	if err != nil {
 		return nil, util.NilID, err
@@ -1104,61 +1088,17 @@ func (s *CommandService) UpdateMemberDisable(ctx context.Context, c *change.Upda
 		res.GenericError = errors.Errorf("member with id %s doesn't exist", c.ID)
 		return res, util.NilID, ErrValidation
 	}
-
-	if c.UserName != "" && c.UserName != member.UserName && s.hasMemberProvider {
-		// if a member provider is defined we shouldn't allow changing the user
-		// name since it may be used to match the matchUID
-		res.HasErrors = true
-		res.UpdateMemberChangeErrorsDisable.UserName = errors.Errorf("user name cannot be changed")
-		return res, util.NilID, ErrValidation
-	}
-
 	// Only an admin or the same member can update a member
 	callingMember, err := readDBService.CallingMember(ctx, curTlSeq)
 	if err != nil {
 		return nil, util.NilID, err
 	}
-	// if !callingMember.IsAdmin && callingMember.ID != member.ID {
-	// 	res.HasErrors = true
-	// 	res.GenericError = errors.Errorf("member not authorized")
-	// 	return res, util.NilID, ErrValidation
-	// }
-
-	// check that the username and email aren't already in use
-	// TODO(sgotti) get members by username or email directly from the db
-	// instead of scanning all the members
-	members, err := readDBService.MembersByIDs(ctx, curTlSeq, nil)
-	if err != nil {
-		return nil, util.NilID, err
-	}
-	//adminCount := 0
-	for _, m := range members {
-		// if m.IsAdmin {
-		// 	adminCount++
-		// }
-		if member.ID == m.ID {
-			continue
-		}
-		if c.UserName == m.UserName {
-			res.HasErrors = true
-			res.UpdateMemberChangeErrorsDisable.UserName = errors.Errorf("username already in use")
-		}
-	}
-
-	// if member.IsAdmin && adminCount <= 1 && !c.IsAdmin {
-	// 	res.HasErrors = true
-	// 	res.UpdateMemberChangeErrorsDisable.IsAdmin = errors.Errorf("removing admin will leave the organization without any admin")
-	// }
-
 
 	if res.HasErrors {
 		return res, util.NilID, ErrValidation
 	}
 
 	prevUserName := member.UserName
-
-	member.UserName = c.UserName
-	
 
 	correlationID := s.uidGenerator.UUID("")
 	causationID := s.uidGenerator.UUID("")

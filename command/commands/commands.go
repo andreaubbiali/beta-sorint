@@ -217,27 +217,23 @@ func NewCommandUpdateMember(c *change.UpdateMemberChange, memberChangeID util.ID
 
 type RequestUpdateMemberDisable struct {
 	MemberID     util.ID
-	UserName     string
 	PrevUserName string
 }
 
 func NewCommandRequestUpdateMemberDisable(c *change.UpdateMemberChangeDisable, memberID util.ID, prevUserName string) *RequestUpdateMemberDisable {
 	return &RequestUpdateMemberDisable{
 		MemberID:     memberID,
-		UserName:     c.UserName,
 		PrevUserName: prevUserName,
 	}
 }
 
 type UpdateMemberDisable struct {
-	UserName       string
 	MemberChangeID util.ID
-	PrevUserName   string
+	PrevUserName string
 }
 
 func NewCommandUpdateMemberDisable(c *change.UpdateMemberChangeDisable, memberChangeID util.ID, prevUserName string) *UpdateMemberDisable {
 	return &UpdateMemberDisable{
-		UserName:       c.UserName,
 		MemberChangeID: memberChangeID,
 		PrevUserName:   prevUserName,
 	}

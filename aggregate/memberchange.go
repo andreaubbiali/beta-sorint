@@ -138,7 +138,6 @@ func (m *MemberChange) HandleRequestUpdateMemberCommandDisable(command *commands
 	c := command.Data.(*commands.RequestUpdateMemberDisable)
 
 	member := &models.Member{
-		UserName: c.UserName,
 	}
 	member.ID = c.MemberID
 

@@ -191,7 +191,6 @@ type CreateMemberChangeErrors struct {
 
 type UpdateMemberChangeDisable struct{
 	ID         util.ID
-	UserName   string
 }
 
 type UpdateMemberResultDisable struct {
@@ -201,7 +200,6 @@ type UpdateMemberResultDisable struct {
 }
 
 type UpdateMemberChangeErrorsDisable struct {
-	UserName   error
 }
 
 type UpdateMemberChange struct {

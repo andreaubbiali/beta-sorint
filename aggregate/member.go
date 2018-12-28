@@ -192,7 +192,6 @@ func (m *Member) HandleUpdateMemberCommandDisable(command *commands.Command) ([]
 	}
 
 	member := &models.Member{
-		UserName: c.UserName,
 	}
 	member.ID = m.id
 
@@ -270,7 +269,6 @@ func (m *Member) ApplyEvent(event *eventstore.StoredEvent) error {
 	case ep.EventTypeMemberUpdatedDisable:
 		data := data.(*ep.EventMemberUpdatedDisable)
 
-		m.userName = data.UserName
 		m.updateRequests[data.MemberChangeID] = struct{}{}
 
 	case ep.EventTypeMemberMatchUIDSet:

@@ -288,28 +288,6 @@ func (s *MemberRequestSaga) HandleEvent(event *eventstore.StoredEvent) ([]ep.Eve
 			return nil, err
 		}
 
-		// we require the previous but eventually consistent username and email
-		// to know if we have to release them on failures in successive steps or
-		// after retrying handling the whole event
-		// Since the previous values are provided by the command service and
-		// read on the readdb, they can be older, so the member aggregate
-		// upgrade command will check them and return error if they have changed
-
-		userNameChanged := data.PrevUserName != data.UserName
-
-		if userNameChanged {
-			if err := s.reserveUserName(correlationID, causationID, data.UserName, data.MemberID, memberChangeID); err != nil {
-				// If the registry returned an error assume it's an already reserved
-				// error
-				log.Error(err)
-				if err := s.completeMemberChangeDisable(correlationID, causationID, memberChangeID, fmt.Sprintf("username %q already reserved", data.UserName)); err != nil {
-					return nil, err
-				}
-
-				return nil, nil
-			}
-		}
-
 		mr := aggregate.NewMemberRepository(s.es, s.uidGenerator)
 		m, err := mr.Load(data.MemberID)
 		if err != nil {
@@ -318,7 +296,6 @@ func (s *MemberRequestSaga) HandleEvent(event *eventstore.StoredEvent) ([]ep.Eve
 
 		log.Debugf("updating memberID %s", data.MemberID)
 		command := commands.NewCommand(commands.CommandTypeUpdateMemberDisable, correlationID, causationID, util.NilID, &commands.UpdateMemberDisable{
-			UserName:       data.UserName,
 			MemberChangeID: memberChangeID,
 			PrevUserName:   data.PrevUserName,
 		})
@@ -327,12 +304,6 @@ func (s *MemberRequestSaga) HandleEvent(event *eventstore.StoredEvent) ([]ep.Eve
 		if _, ok := err.(aggregate.HandleCommandError); ok {
 			// Rollback reservations if the member update command returned an error
 			log.Error(err)
-
-			if userNameChanged {
-				if err := s.releaseUserName(correlationID, causationID, data.UserName, data.MemberID, memberChangeID); err != nil {
-					return nil, err
-				}
-			}
 
 			if err := s.completeMemberChangeDisable(correlationID, causationID, memberChangeID, fmt.Sprintf("error updating member: %v", err)); err != nil {
 				return nil, err
@@ -412,18 +383,6 @@ func (s *MemberRequestSaga) HandleEvent(event *eventstore.StoredEvent) ([]ep.Eve
 
 	case ep.EventTypeMemberUpdatedDisable:
 		data := data.(*ep.EventMemberUpdatedDisable)
-		memberID, err := util.IDFromString(event.StreamID)
-		if err != nil {
-			return nil, err
-		}
-
-		userNameChanged := data.PrevUserName != data.UserName
-
-		if userNameChanged {
-			if err := s.releaseUserName(correlationID, causationID, data.PrevUserName, memberID, data.MemberChangeID); err != nil {
-				return nil, err
-			}
-		}
 
 		if err := s.completeMemberChangeDisable(correlationID, causationID, data.MemberChangeID, ""); err != nil {
 			return nil, err
