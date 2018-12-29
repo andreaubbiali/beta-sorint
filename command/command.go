@@ -1076,6 +1076,8 @@ func (s *CommandService) UpdateMemberDisable(ctx context.Context, c *change.Upda
 		return nil, util.NilID, err
 	}
 
+	// read current timestamp
+	// end_tl is equal to start_tl-1
 	curTl := readDBService.CurTimeLine(ctx)
 	curTlSeq := curTl.Number()
 
@@ -1088,10 +1090,32 @@ func (s *CommandService) UpdateMemberDisable(ctx context.Context, c *change.Upda
 		res.GenericError = errors.Errorf("member with id %s doesn't exist", c.ID)
 		return res, util.NilID, ErrValidation
 	}
-	// Only an admin or the same member can update a member
+
+	// Only an admin or the same member can disable a member
 	callingMember, err := readDBService.CallingMember(ctx, curTlSeq)
 	if err != nil {
 		return nil, util.NilID, err
+	}
+
+	// an active member not have end_tl
+	// read active member from db
+	members, err := readDBService.MembersByIDs(ctx, curTlSeq, nil)
+	if err != nil {
+		return nil, util.NilID, err
+	}
+
+	// count active admin
+	adminCount := 0
+	for _, m := range members {
+		if m.IsAdmin {
+			adminCount++
+		}
+	}
+
+	// cannot disable last admin
+	if member.IsAdmin && adminCount <= 1 {
+		res.HasErrors = true
+		res.GenericError = errors.Errorf("Cannot disable last admin")
 	}
 
 	if res.HasErrors {
