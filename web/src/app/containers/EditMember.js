@@ -504,17 +504,19 @@ class EditMember extends React.Component {
             { viewer.member.isAdmin &&
             <Form.Field control={Checkbox} label='Admin' checked={curMember.isAdmin} onChange={this.handleEditIsAdmin} />
             }
-            <Button floated='right' color='green' disabled={disabled || submitting} onClick={this.handleSubmit}>{submitText}</Button>
-            { viewer.member.isAdmin && type === 'edit' && mode === 'member' && 
-              <Button type="button" floated='right' color='red' onClick={this.openDisableMember}>Disable Member</Button>
-            }
+            <div>
+              <Button floated='right' color='green' disabled={disabled || submitting} onClick={this.handleSubmit}>{submitText}</Button>
+              { viewer.member.isAdmin && type === 'edit' && mode === 'member' && 
+                <Button type="button" floated='right' color='red' onClick={this.openDisableMember}>Disable Member</Button>
+              }
+              { !mode === 'self' &&
+                <Button floated='right' disabled={submitting} onClick={this.handleCancel}>Cancel</Button>
+              }
+            </div>
             { viewer.member.isAdmin && type === 'edit' && mode === 'member' && 
               <Confirm open={this.state.isOpenDisableMember} onCancel={this.closeDisableMember} onConfirm={this.handleSubmitDisable} />
             }
-            { !mode === 'self' &&
-            <Button floated='right' disabled={submitting} onClick={this.handleCancel}>Cancel</Button>
-            }
-            <span style={{clear: 'both'}} />
+            <div style={{clear: 'both'}} />
           </Form>
           <Message negative hidden={!showError} onDismiss={this.handleErrorMessageDismiss}>
             <p>{errorMessage}</p>

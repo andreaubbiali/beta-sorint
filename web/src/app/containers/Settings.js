@@ -74,7 +74,7 @@ class Settings extends React.Component {
               <Route exact path='/settings/admin/member/:memberUID/edit' render={(props) =>
                 <div>
                   <EditMember type='edit' mode='member' {...props} />
-                  <Divider clearing />
+                  <Divider clearing section />
                   <UpdateMemberPassword mode='member' {...props} />
                 </div>
                 } />
