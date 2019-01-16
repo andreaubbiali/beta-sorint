@@ -2879,10 +2879,8 @@ func (h *DBEventHandler) handleEvent(event *eventstore.StoredEvent, tx *db.Tx, s
 			return err
 		}
 
-		// member := &models.Member{
-		// 	UserName: data.UserName,
-		// }
-		if err := s.closeVertex(tl.Number()-1, vertexClassMember, memberID); err != nil {
+		// disable a member by adding end_tl to his last record
+		if err := s.deleteVertex(tl.Number()-1, vertexClassMember, memberID); err != nil {
 			return err
 		}
 
