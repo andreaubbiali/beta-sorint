@@ -14,6 +14,7 @@ type timeLineConnectionResolver struct {
 	s             readdb.ReadDBService
 	timeLines     []*util.TimeLine
 	aggregateType string
+	aggregateType1 string
 	aggregateID   *util.ID
 	hasMoreData   bool
 
@@ -27,7 +28,7 @@ func (r *timeLineConnectionResolver) HasMoreData() bool {
 func (r *timeLineConnectionResolver) Edges() *[]*timeLineEdgeResolver {
 	l := make([]*timeLineEdgeResolver, len(r.timeLines))
 	for i, timeLine := range r.timeLines {
-		l[i] = &timeLineEdgeResolver{r.s, timeLine, r.aggregateType, r.aggregateID, r.dataLoaders}
+		l[i] = &timeLineEdgeResolver{r.s, timeLine, r.aggregateType, r.aggregateType1, r.aggregateID, r.dataLoaders}
 	}
 	return &l
 }
@@ -36,13 +37,14 @@ type timeLineEdgeResolver struct {
 	s             readdb.ReadDBService
 	timeLine      *util.TimeLine
 	aggregateType string
+	aggregateType1 string
 	aggregateID   *util.ID
 
 	dataLoaders *dataloader.DataLoaders
 }
 
 func (r *timeLineEdgeResolver) Cursor() (string, error) {
-	return marshalTimeLineCursor(&TimeLineCursor{TimeLineID: strconv.FormatInt(int64(r.timeLine.Number()), 10), AggregateType: r.aggregateType, AggregateID: r.aggregateID})
+	return marshalTimeLineCursor(&TimeLineCursor{TimeLineID: strconv.FormatInt(int64(r.timeLine.Number()), 10), AggregateType: r.aggregateType, AggregateType1: r.aggregateType1, AggregateID: r.aggregateID})
 }
 
 func (r *timeLineEdgeResolver) TimeLine() *timeLineResolver {

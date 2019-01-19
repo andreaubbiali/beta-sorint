@@ -36,7 +36,7 @@ type ReadDBService interface {
 	// Queries
 	CurTimeLine(ctx context.Context) *util.TimeLine
 	TimeLine(ctx context.Context, tl util.TimeLineNumber) (*util.TimeLine, error)
-	TimeLines(ctx context.Context, ts *time.Time, tl util.TimeLineNumber, limit int, after bool, aggregateType string, aggregateID *util.ID) ([]*util.TimeLine, bool, error)
+	TimeLines(ctx context.Context, ts *time.Time, tl util.TimeLineNumber, limit int, after bool, aggregateType string, aggregateType1 string, aggregateID *util.ID) ([]*util.TimeLine, bool, error)
 	TimeLineAtTimeStamp(ctx context.Context, t time.Time) (*util.TimeLine, error)
 	TimeLineForGroupID(ctx context.Context, groupID util.ID) (*util.TimeLine, error)
 
@@ -1389,7 +1389,7 @@ func (s *readDBService) TimeLineForGroupID(ctx context.Context, groupID util.ID)
 	return &tl, err
 }
 
-func (s *readDBService) TimeLines(ctx context.Context, ts *time.Time, sn util.TimeLineNumber, limit int, after bool, aggregateType string, aggregateID *util.ID) ([]*util.TimeLine, bool, error) {
+func (s *readDBService) TimeLines(ctx context.Context, ts *time.Time, sn util.TimeLineNumber, limit int, after bool, aggregateType string, aggregateType1 string, aggregateID *util.ID) ([]*util.TimeLine, bool, error) {
 	var tls []*util.TimeLine
 	if limit <= 0 {
 		limit = MaxFetchSize
@@ -1408,8 +1408,8 @@ func (s *readDBService) TimeLines(ctx context.Context, ts *time.Time, sn util.Ti
 	sb = sb.Limit(uint64(limit + 1))
 
 	if aggregateType != "" {
-		sb = sb.Where(sq.Eq{"aggregatetype": aggregateType})
-	}
+		sb = sb.Where(sq.Or{sq.Eq{"aggregatetype": aggregateType },sq.Eq{"aggregatetype": aggregateType1}})
+	} 
 	if aggregateID != nil {
 		sb = sb.Where(sq.Eq{"aggregateid": aggregateID})
 	}

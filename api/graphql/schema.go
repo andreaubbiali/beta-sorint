@@ -41,7 +41,7 @@ var Schema = `
 		viewer(): Viewer!
 
 		timeLine(id: TimeLineID): TimeLine
-		timeLines(fromTime: Time, fromID: String, first: Int, last: Int, after: String, before: String, aggregateType: String, aggregateID: ID): TimeLineConnection
+		timeLines(fromTime: Time, fromID: String, first: Int, last: Int, after: String, before: String, aggregateType: String, aggregateType1: String, aggregateID: ID): TimeLineConnection
 
 		rootRole(timeLineID: TimeLineID): Role
 		role(timeLineID: TimeLineID, uid: ID!): Role
@@ -629,6 +629,7 @@ func unmarshalUID(uid graphql.ID) (util.ID, error) {
 type TimeLineCursor struct {
 	TimeLineID    string
 	AggregateType string
+	AggregateType1 string
 	AggregateID   *util.ID
 }
 
@@ -1314,7 +1315,7 @@ func getTimeLineNumber(ctx context.Context, readDB readdb.ReadDBService, v *util
 		// a negative values means that we will use current timeLineID - v
 
 		n := int(-*v)
-		tls, _, err := readDB.TimeLines(ctx, nil, curTl.Number(), n, false, "", nil)
+		tls, _, err := readDB.TimeLines(ctx, nil, curTl.Number(), n, false, "", "", nil)
 		if err != nil {
 			return 0, err
 		}
@@ -1365,6 +1366,7 @@ func (r *Resolver) TimeLines(ctx context.Context, args *struct {
 	FromTime      *graphql.Time
 	FromID        *string
 	AggregateType *string
+	AggregateType1 *string
 	AggregateID   *graphql.ID
 	First         *float64
 	Last          *float64
@@ -1392,6 +1394,7 @@ func (r *Resolver) TimeLines(ctx context.Context, args *struct {
 	var fromTime *time.Time
 	var fromID int64
 	var aggregateType string
+	var aggregateType1 string
 	var aggregateID *util.ID
 	var err error
 
@@ -1416,6 +1419,7 @@ func (r *Resolver) TimeLines(ctx context.Context, args *struct {
 		}
 		timeLineID = util.TimeLineNumber(tl)
 		aggregateType = cursor.AggregateType
+		aggregateType1 = cursor.AggregateType1
 		aggregateID = cursor.AggregateID
 	}
 	if args.Before != nil {
@@ -1429,6 +1433,7 @@ func (r *Resolver) TimeLines(ctx context.Context, args *struct {
 		}
 		timeLineID = util.TimeLineNumber(tl)
 		aggregateType = cursor.AggregateType
+		aggregateType1 = cursor.AggregateType1
 		aggregateID = cursor.AggregateID
 	}
 	if args.FromTime != nil {
@@ -1457,12 +1462,12 @@ func (r *Resolver) TimeLines(ctx context.Context, args *struct {
 		return nil, err
 	}
 
-	timeLines, hasMoreData, err := s.TimeLines(ctx, fromTime, timeLineID, limit, args.Last == nil, aggregateType, aggregateID)
+	timeLines, hasMoreData, err := s.TimeLines(ctx, fromTime, timeLineID, limit, args.Last == nil, aggregateType, aggregateType1, aggregateID)
 	if err != nil {
 		return nil, err
 	}
 
-	return &timeLineConnectionResolver{s, timeLines, aggregateType, aggregateID, hasMoreData, dataloader.NewDataLoaders(ctx, s)}, nil
+	return &timeLineConnectionResolver{s, timeLines, aggregateType, aggregateType1, aggregateID, hasMoreData, dataloader.NewDataLoaders(ctx, s)}, nil
 }
 
 func (r *Resolver) Viewer(ctx context.Context) (*viewerResolver, error) {

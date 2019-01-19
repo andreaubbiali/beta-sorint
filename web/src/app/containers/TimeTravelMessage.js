@@ -75,10 +75,10 @@ const timeLineQuery = gql`
     }
   }
 `
-
+//timeLines(first: 1, aggregateType: "rolestree || member", fromID: $fromID) {
 const timeLineAfter = gql`
   query timeLineAfterTime($fromID: String) {
-    timeLines(first: 1, aggregateType: "rolestree", fromID: $fromID) {
+    timeLines(first: 1, aggregateType: "rolestree", aggregateType1: "member",  fromID: $fromID) {
       edges {
         timeLine {
           id
@@ -91,7 +91,7 @@ const timeLineAfter = gql`
 
 const timeLineBefore = gql`
   query timeLineBeforeTime($fromID: String) {
-    timeLines(last: 1, aggregateType: "rolestree", fromID: $fromID) {
+    timeLines(last: 1, aggregateType: "rolestree", aggregateType1: "member",  fromID: $fromID) {
       edges {
         timeLine {
           id

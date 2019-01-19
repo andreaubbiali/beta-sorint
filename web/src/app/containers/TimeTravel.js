@@ -57,7 +57,7 @@ class TimeTravel extends React.Component {
 
 const timeLineAfterTimeQuery = gql`
   query timeLineAfterTime($fromTime: Time) {
-    timeLines(first: 1, aggregateType: "rolestree", fromTime: $fromTime) {
+    timeLines(first: 1, aggregateType: "rolestree", aggregateType1: "member", fromTime: $fromTime) {
       edges {
         timeLine {
           id
@@ -69,7 +69,7 @@ const timeLineAfterTimeQuery = gql`
 
 const timeLineBeforeTimeQuery = gql`
   query timeLineBeforeTime($fromTime: Time) {
-    timeLines(last: 1, aggregateType: "rolestree", fromTime: $fromTime) {
+    timeLines(last: 1, aggregateType: "rolestree", aggregateType1: "member",  fromTime: $fromTime) {
       edges {
         timeLine {
           id
